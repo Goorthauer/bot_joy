@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"log"
@@ -9,9 +9,9 @@ import (
 )
 
 type Message struct {
-	Chat *tb.Chat
-	Tag  string
-	Options  *tb.Message
+	Chat    *tb.Chat
+	Tag     string
+	Options *tb.Message
 }
 
 type MessageQueue struct {
@@ -36,7 +36,7 @@ func (m *MessageQueue) QueueWorker() {
 		joyUrl, err := GetRandomBoobs(msg.Tag)
 		if err != nil {
 			log.Println(err)
-			_, err = m.bot.Send(msg.Chat, "Ошибка получения изображения",&tb.SendOptions{ReplyTo: msg.Options.ReplyTo})
+			_, err = m.bot.Send(msg.Chat, "Ошибка получения изображения", &tb.SendOptions{ReplyTo: msg.Options.ReplyTo})
 			if err != nil {
 				log.Println(err)
 			}
@@ -45,7 +45,7 @@ func (m *MessageQueue) QueueWorker() {
 		filename, err := DownloadFile(joyUrl)
 		if err != nil {
 			log.Println(err)
-			_, err = m.bot.Send(msg.Chat, "Ошибка распознавания изображения",&tb.SendOptions{ReplyTo: msg.Options.ReplyTo})
+			_, err = m.bot.Send(msg.Chat, "Ошибка распознавания изображения", &tb.SendOptions{ReplyTo: msg.Options.ReplyTo})
 			if err != nil {
 				log.Println(err)
 			}
@@ -56,12 +56,17 @@ func (m *MessageQueue) QueueWorker() {
 			log.Println(err)
 			continue
 		}
-		defer os.Remove(filename)
 		image := &tb.Photo{File: tb.FromDisk(filename)}
-		_, err = m.bot.Send(msg.Chat,image,&tb.SendOptions{ReplyTo: msg.Options})
+		_, err = m.bot.Send(msg.Chat, image, &tb.SendOptions{ReplyTo: msg.Options})
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		err = os.Remove(filename)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 	}
+
 }

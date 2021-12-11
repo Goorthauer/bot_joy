@@ -1,15 +1,16 @@
-package main
+package internal
 
 import (
-	"bot_joy/config"
+	joyConfig "bot_joy/config"
 	"fmt"
-	"github.com/joho/godotenv"
 	"image/jpeg"
 	"log"
 	"math/rand"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/joho/godotenv"
 
 	"github.com/disintegration/imaging"
 
@@ -20,7 +21,7 @@ var (
 	queue *MessageQueue
 )
 
-func getCommand(conf *config.Config) string {
+func getCommand(conf *joyConfig.Config) string {
 	response := "комадны\n"
 	for i, res := range conf.Query {
 		response += fmt.Sprintf("-----------\nБлок №%v\nЗапрос: %v\nТеги для поиска: %v\n-----------", i+1, res.Call, res.Response)
@@ -29,8 +30,8 @@ func getCommand(conf *config.Config) string {
 
 }
 
-func telegramBot() {
-	conf := config.New()
+func TelegramBot() {
+	conf := joyConfig.New()
 	b, err := tb.NewBot(tb.Settings{
 		Token:  conf.Token,
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
@@ -55,7 +56,7 @@ func telegramBot() {
 		if tag == "" {
 			return
 		}
-		log.Printf("Присвоен тег:%v. Специально для юзера %v", tag,m.Sender.Username)
+		log.Printf("Присвоен тег:%v. Специально для юзера %v", tag, m.Sender.Username)
 		queue.MessageQueue <- Message{
 			Chat:    m.Chat,
 			Tag:     tag,
@@ -84,7 +85,7 @@ func cropImage(filename string) error {
 	return nil
 }
 
-func commandExist(configs []config.QueryConfig, query string) string {
+func commandExist(configs []joyConfig.QueryConfig, query string) string {
 	for _, config := range configs {
 		for _, item := range config.Call {
 			if strings.Contains(query, strings.TrimSpace(item)) {

@@ -1,15 +1,16 @@
-package main
+package internal
 
 import (
 	"errors"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	"io"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 var (
@@ -18,7 +19,7 @@ var (
 	ErrNoImage           = errors.New("нет картинки")
 	ErrInvalidPageNumber = errors.New("некорректный номер страницы")
 	ErrInvalidPostNumber = errors.New("некорректный номер поста")
-	ConnectionFailed     = errors.New("ошибка подключения")
+	ErrConnectionFailed  = errors.New("ошибка подключения")
 	ErrNoMaxPages        = errors.New("ошибка получения максимальной страницы")
 )
 
@@ -26,6 +27,9 @@ const MaxPostsOnPage = 10
 
 func GetDocumentFromURL(joyUrl string) (*goquery.Document, error) {
 	joyUrl, err := url.QueryUnescape(joyUrl)
+	if err != nil {
+		return nil, ErrInvalidUrl
+	}
 	getPage, err := http.Get(joyUrl)
 	if err != nil {
 		return nil, ErrInvalidUrl
@@ -63,7 +67,7 @@ func GetBoobs(page int, post int, tag string, pages int) (string, error) {
 			return
 		}
 		attr, exists := s.Find("a > img").Last().Attr("src")
-		if exists == false {
+		if !exists {
 			err = ErrNoImage
 			return
 		}
@@ -112,7 +116,7 @@ func GetPagesCount(tag string) (int, error) {
 	joyUrl := fmt.Sprintf("http://joyreactor.cc/tag/%s", tag)
 	doc, err := GetDocumentFromURL(joyUrl)
 	if err != nil {
-		return 0, ConnectionFailed
+		return 0, ErrConnectionFailed
 	}
 	pages, err := strconv.Atoi(doc.Find(".pagination_expanded .current").Text())
 	if err != nil {

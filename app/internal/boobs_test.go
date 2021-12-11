@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"testing"
@@ -129,7 +129,7 @@ func TestGetPagesCount(t *testing.T) {
 		{
 			name: "connectionFailed",
 			tag:  "%!invalidTag%!",
-			err:  ConnectionFailed,
+			err:  ErrConnectionFailed,
 		},
 		{
 			name: "noMaxPage",

@@ -1,10 +1,12 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
+	"bot_joy/app/internal"
 	"log"
 	"math/rand"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -14,5 +16,5 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	log.Printf("Бот включен")
-	telegramBot()
+	internal.TelegramBot()
 }
