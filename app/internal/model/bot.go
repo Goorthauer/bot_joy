@@ -22,7 +22,7 @@ var (
 )
 
 func getCommand(conf *joyConfig.Config) string {
-	response := "комадны\n"
+	response := "Команды:\n"
 	for i, res := range conf.Query {
 		response += fmt.Sprintf("-----------\nБлок №%v\nЗапрос: %v\nТеги для поиска: %v\n-----------", i+1, res.Call, res.Response)
 	}
@@ -49,10 +49,10 @@ func TelegramBot(r *RedisClient) {
 		defer cancel()
 		upperText := strings.ToUpper(m.Text)
 		if strings.Contains(upperText, "/HELP") {
-			queue.bot.Send(m.Chat, getCommand(conf))
+			queue.bot.Send(m.Chat, getCommand(conf), &tb.SendOptions{ReplyTo: m})
 		} else if strings.Contains(upperText, "/STATISTIC") {
 			out, _ := r.getAll(ctx, strconv.Itoa(m.Sender.ID))
-			queue.bot.Send(m.Chat, out)
+			queue.bot.Send(m.Chat, out, &tb.SendOptions{ReplyTo: m})
 		}
 		tag := commandExist(conf.Query, upperText)
 		if tag != "" {
