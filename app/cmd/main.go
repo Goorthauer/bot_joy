@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bot_joy/app/internal"
+	"bot_joy/app/internal/model"
 	"log"
 	"math/rand"
 	"time"
@@ -16,5 +16,6 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	log.Printf("Бот включен")
-	internal.TelegramBot()
+	redisClient, err := model.NewRedis()
+	model.TelegramBot(redisClient)
 }

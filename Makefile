@@ -28,6 +28,18 @@ install-looppointer:
 install-swagger:
 	@go install github.com/swaggo/swag/cmd/swag
 
+.PHONY: build
+build:
+	@echo build $(VERSION)
+	@CGO_ENABLED=0 \
+	GOPRIVATE=$(GOPRIVATE) \
+		go build \
+		-mod=mod \
+		$(LDFLAGS) \
+		$(GOFLAGS) \
+		-o ${NAME} \
+		$(MAIN)
+
 swag:
 	@swag init -g ./app/cmd/main.go
 

@@ -1,16 +1,16 @@
-package internal
+package model
 
 import (
 	joyConfig "bot_joy/config"
+	"context"
 	"fmt"
 	"image/jpeg"
 	"log"
 	"math/rand"
 	"os"
+	"strconv"
 	"strings"
 	"time"
-
-	"github.com/joho/godotenv"
 
 	"github.com/disintegration/imaging"
 
@@ -30,7 +30,7 @@ func getCommand(conf *joyConfig.Config) string {
 
 }
 
-func TelegramBot() {
+func TelegramBot(r *RedisClient) {
 	conf := joyConfig.New()
 	b, err := tb.NewBot(tb.Settings{
 		Token:  conf.Token,
@@ -45,25 +45,26 @@ func TelegramBot() {
 	}
 
 	b.Handle(tb.OnText, func(m *tb.Message) {
-		_ = godotenv.Load()
-		//log.Printf("Пришел запрос:  %v", m.Text)
+		ctx, cancel := context.WithTimeout(context.Background(), 33*time.Second)
+		defer cancel()
 		upperText := strings.ToUpper(m.Text)
-		if strings.Contains(upperText, "HELP") {
+		if strings.Contains(upperText, "/HELP") {
 			queue.bot.Send(m.Chat, getCommand(conf))
-			return
+		} else if strings.Contains(upperText, "/STATISTIC") {
+			out, _ := r.getAll(ctx, strconv.Itoa(m.Sender.ID))
+			queue.bot.Send(m.Chat, out)
 		}
 		tag := commandExist(conf.Query, upperText)
-		if tag == "" {
-			return
-		}
-		log.Printf("Присвоен тег:%v. Специально для юзера %v", tag, m.Sender.Username)
-		queue.MessageQueue <- Message{
-			Chat:    m.Chat,
-			Tag:     tag,
-			Options: m,
+		if tag != "" {
+			queue.MessageQueue <- Message{
+				Chat:    m.Chat,
+				Tag:     tag,
+				Options: m,
+			}
+			log.Printf("Присвоен тег:%v. Специально для юзера %v", tag, m.Sender.Username)
+			r.addMemory(ctx, tag, strconv.Itoa(m.Sender.ID))
 		}
 	})
-
 	b.Start()
 }
 
