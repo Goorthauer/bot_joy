@@ -1,4 +1,4 @@
-NAME := report-creator
+NAME := bot_joy
 
 PKG := `go list -mod=mod -f {{.Dir}} ./...`
 MAIN := app/cmd/main.go
@@ -30,13 +30,10 @@ install-swagger:
 
 .PHONY: build
 build:
-	@echo build $(VERSION)
+	@echo build
 	@CGO_ENABLED=0 \
-	GOPRIVATE=$(GOPRIVATE) \
-		go build \
+		env GOOS=linux GOARCH=amd64 go build \
 		-mod=mod \
-		$(LDFLAGS) \
-		$(GOFLAGS) \
 		-o ${NAME} \
 		$(MAIN)
 
