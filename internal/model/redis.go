@@ -31,19 +31,18 @@ func NewRedis() (*RedisClient, error) {
 	return &RedisClient{client: r}, nil
 }
 
-func (rc *RedisClient) addMemory(ctx context.Context, column, key string) {
+func (rc *RedisClient) AddMemory(ctx context.Context, column, key string) {
+	var count int
 	countStr, err := rc.getMemory(ctx, key, column)
 	if err != nil {
-		fmt.Errorf("addMemory get : %w", err)
+		fmt.Println("AddMemory get :", err)
 	}
-	count, _ := strconv.Atoi(countStr)
-	if err != nil {
-		fmt.Errorf("addMemory atoi : %w", err)
+	if count, err = strconv.Atoi(countStr); err == nil {
+		count++
 	}
-	count++
-	_, err = rc.client.HMSet(ctx, key, column, count).Result()
-	if err != nil {
-		fmt.Errorf("addMemory HMSET : %w", err)
+
+	if _, err = rc.client.HMSet(ctx, key, column, count).Result(); err != nil {
+		fmt.Println("AddMemory HMSET :", err)
 	}
 }
 
@@ -56,7 +55,7 @@ func (rc *RedisClient) getMemory(ctx context.Context, key, field string) (string
 	return "", err
 }
 
-func (rc *RedisClient) getAll(ctx context.Context, key string) (string, error) {
+func (rc *RedisClient) GetAll(ctx context.Context, key string) (string, error) {
 	var outString string
 	strCmd := rc.client.HGetAll(ctx, key)
 	fmt.Println(strCmd)
@@ -68,9 +67,4 @@ func (rc *RedisClient) getAll(ctx context.Context, key string) (string, error) {
 		return outString, nil
 	}
 	return outString, err
-}
-
-type Output struct {
-	Key   string `json:"key,omitempty"`
-	Value string `json:"value,omitempty"`
 }
