@@ -1,10 +1,11 @@
 package main
 
 import (
-	"bot_joy/app/internal/model"
 	"log"
 	"math/rand"
 	"time"
+
+	"bot_joy/manager"
 
 	"github.com/joho/godotenv"
 )
@@ -16,6 +17,5 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	log.Printf("Бот включен")
-	redisClient, err := model.NewRedis()
-	model.TelegramBot(redisClient)
+	manager.New().JoinBot()
 }

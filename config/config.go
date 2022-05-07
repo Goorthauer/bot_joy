@@ -17,14 +17,14 @@ type Config struct {
 
 // New returns a new Config struct
 func New() *Config {
-	allCall := Explode(",", getEnv("ALL_QUERY", ""))
-	allResponse := Explode(",", getEnv("ALL_RESPONSE", ""))
+	allCall := explode(",", getEnv("ALL_QUERY", ""))
+	allResponse := explode(",", getEnv("ALL_RESPONSE", ""))
 	var newQueryConfig = make([]QueryConfig, len(allCall))
 	for i, callQuery := range allCall {
 		responseQuery := allResponse[i]
 		newQueryConfig[i] = QueryConfig{
-			Call:     Explode(",", getEnv(callQuery, "")),
-			Response: Explode(",", getEnv(responseQuery, "")),
+			Call:     explode(",", getEnv(callQuery, "")),
+			Response: explode(",", getEnv(responseQuery, "")),
 		}
 	}
 	return &Config{
@@ -42,7 +42,7 @@ func getEnv(key string, defaultVal string) string {
 	return defaultVal
 }
 
-func Explode(delimiter, text string) []string {
+func explode(delimiter, text string) []string {
 	if len(delimiter) > len(text) {
 		return strings.Split(delimiter, text)
 	}
