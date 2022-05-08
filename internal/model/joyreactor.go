@@ -25,6 +25,11 @@ var (
 
 const MaxPostsOnPage = 10
 
+type JoyLoader struct {
+	Image       string
+	Description string
+}
+
 func GetDocumentFromURL(joyUrl string) (*goquery.Document, error) {
 	joyUrl, err := url.QueryUnescape(joyUrl)
 	if err != nil {
@@ -46,55 +51,58 @@ func GetDocumentFromURL(joyUrl string) (*goquery.Document, error) {
 	return page, nil
 }
 
-func GetBoobs(page int, post int, tag string, pages int) (string, error) {
+func GetRandomPictures(tag string) (*JoyLoader, error) {
+	pages, err := GetPagesCount(tag)
+	if err != nil {
+		return nil, ErrNoMaxPages
+	}
+
+	for {
+		page := rand.Intn(pages) + 1
+		post := rand.Intn(9) + 1
+		joy, err := GetJoy(page, post, tag, pages)
+		if err != ErrNoImage && err != ErrPageNotFound && err != nil {
+			return nil, err
+		}
+		if err != nil {
+			continue
+		}
+		return joy, nil
+	}
+}
+
+func GetJoy(page int, post int, tag string, pages int) (*JoyLoader, error) {
 	if page < 1 || page > pages {
-		return "", ErrInvalidPageNumber
+		return nil, ErrInvalidPageNumber
 	}
 	if post < 1 || post > MaxPostsOnPage {
-		return "", ErrInvalidPostNumber
+		return nil, ErrInvalidPostNumber
 	}
 
 	joyUrl := fmt.Sprintf("http://joyreactor.cc/tag/%s/%d", tag, page)
 	doc, err := GetDocumentFromURL(joyUrl)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-
-	var result string
+	loader := &JoyLoader{}
 	doc.Find(".postContainer").Each(func(i int, s *goquery.Selection) {
 		if i != (post - 1) {
 			return
 		}
-		attr, exists := s.Find("a > img").Last().Attr("src")
+		findSelector := s.Find("a > img").Last()
+		attr, exists := findSelector.Attr("src")
 		if !exists {
 			err = ErrNoImage
 			return
 		}
+		loader.Image = attr
+		if attr, exists = findSelector.Attr("alt"); exists {
+			loader.Description = attr
+		}
 
-		result = attr
 	})
-	return result, err
-}
-
-func GetRandomBoobs(tag string) (string, error) {
-	pages, err := GetPagesCount(tag)
-	if err != nil {
-		return "", ErrNoMaxPages
-	}
-
-	for {
-		page := rand.Intn(pages) + 1
-		post := rand.Intn(9) + 1
-		joyUrl, err := GetBoobs(page, post, tag, pages)
-		if err != ErrNoImage && err != ErrPageNotFound && err != nil {
-			return "", err
-		}
-		if err != nil {
-			continue
-		}
-		return joyUrl, nil
-	}
+	return loader, err
 }
 
 func DownloadFile(joyUrl string) (string, error) {

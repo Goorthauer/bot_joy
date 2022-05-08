@@ -14,10 +14,9 @@ type TracingService struct {
 }
 
 func NewTrace() *TracingService {
-	var (
-		err            error
-		tracingService *TracingService
-	)
+	var err error
+
+	tracingService := &TracingService{}
 	if tracing := os.Getenv("TRACING"); tracing == "ON" {
 		tracingService.exporter, err = jaeger.NewExporter(jaeger.Options{
 			AgentEndpoint:     "localhost:6831",

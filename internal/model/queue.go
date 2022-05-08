@@ -38,14 +38,14 @@ func (m *MessageQueue) QueueWorker() {
 }
 
 func (m *MessageQueue) send(msg Message) {
-	var joyUrl string
 	time.Sleep(m.Timeout)
-	joyUrl, err := GetRandomBoobs(msg.Tag)
+	joyDoc, err := GetRandomPictures(msg.Tag)
 	msg.Trace.
 		addInt("chat_id", msg.Options.Chat.ID).
 		addString("chat_title", msg.Options.Chat.Title).
 		addString("chat_username", msg.Options.Chat.Username).
-		addString("joy_url", joyUrl).
+		addString("joy_url", joyDoc.Image).
+		addString("joy_tags", joyDoc.Description).
 		End()
 	if err != nil {
 		log.Println(err)
@@ -56,7 +56,7 @@ func (m *MessageQueue) send(msg Message) {
 		return
 	}
 
-	filename, err := DownloadFile(joyUrl)
+	filename, err := DownloadFile(joyDoc.Image)
 	if err != nil {
 		log.Println(err)
 		if _, err = m.Bot.Send(msg.Chat, "Ошибка распознавания изображения", &tb.SendOptions{ReplyTo: msg.Options.ReplyTo}); err != nil {
