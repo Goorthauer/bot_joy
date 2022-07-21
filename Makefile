@@ -13,7 +13,7 @@ test:
 	@docker-compose build && docker-compose up test
 
 
-install-lint: install-goimports install-golangci install-looppointer
+install-lint: install-goimports install-golangci
 
 
 install-goimports:
@@ -22,8 +22,6 @@ install-goimports:
 install-golangci:
 	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
-install-looppointer:
-	@go install github.com/kyoh86/looppointer/cmd/looppointer@latest
 
 install-swagger:
 	@go install github.com/swaggo/swag/cmd/swag
@@ -45,7 +43,6 @@ fmt:
 
 lint:
 	@golangci-lint run -c .golangci.yml
-	@looppointer -c 3 ./...
 
 mod-download:
 	go mod download all
@@ -53,6 +50,6 @@ mod-download:
 mod-tidy:
 	go mod tidy
 
-mod: mod-tidy mod-download install-looppointer install-swagger
+mod: mod-tidy mod-download install-swagger
 
 pre-commit: fmt lint test

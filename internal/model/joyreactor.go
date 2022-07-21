@@ -23,7 +23,11 @@ var (
 	ErrNoMaxPages        = errors.New("ошибка получения максимальной страницы")
 )
 
-const MaxPostsOnPage = 10
+const (
+	MaxPostsOnPage = 10
+
+	urlPictureDraw = "http://joyreactor.cc/tag"
+)
 
 type JoyLoader struct {
 	Image       string
@@ -79,7 +83,7 @@ func GetJoy(page int, post int, tag string, pages int) (*JoyLoader, error) {
 		return nil, ErrInvalidPostNumber
 	}
 
-	joyUrl := fmt.Sprintf("http://joyreactor.cc/tag/%s/%d", tag, page)
+	joyUrl := fmt.Sprintf("%s/%s/%d", urlPictureDraw, tag, page)
 	doc, err := GetDocumentFromURL(joyUrl)
 
 	if err != nil {
@@ -96,7 +100,7 @@ func GetJoy(page int, post int, tag string, pages int) (*JoyLoader, error) {
 			err = ErrNoImage
 			return
 		}
-		loader.Image = attr
+		loader.Image = fmt.Sprintf("https:%s", attr)
 		if attr, exists = findSelector.Attr("alt"); exists {
 			loader.Description = attr
 		}
