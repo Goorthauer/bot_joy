@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	rand.Seed(time.Now().Unix())
+	rand.New(rand.NewSource(time.Now().Unix()))
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")

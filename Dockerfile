@@ -1,11 +1,11 @@
 # Initial stage: download modules
-FROM golang:1.17 as modules
+FROM golang:1.20 as modules
 
 ADD go.mod go.sum /m/
 RUN cd /m && go mod download
 
 # Intermediate stage: Build the binary
-FROM golang:1.17 as builder
+FROM golang:1.20 as builder
 
 ARG NAME_ENV=bot_joy
 

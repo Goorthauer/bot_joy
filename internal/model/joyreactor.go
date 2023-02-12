@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 
 	"github.com/PuerkitoBio/goquery"
@@ -115,7 +115,7 @@ func DownloadFile(joyUrl string) (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
-	out, err := ioutil.TempFile("", "*.jpeg")
+	out, err := os.CreateTemp("", "*.jpeg")
 	if err != nil {
 		return "", err
 	}
